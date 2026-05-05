@@ -1,8 +1,8 @@
 package vn.nlu.todo.services;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.nlu.todo.dto.TodoCreateDTO;
 import vn.nlu.todo.dto.TodoResponseDTO;
 import vn.nlu.todo.dto.TodoUpdateDTO;
@@ -29,11 +29,13 @@ public class TodoService implements ITodoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TodoResponseDTO> getAll() {
         return repository.findAll().stream().map(this::toDTO).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TodoResponseDTO getById(Long id) {
         return repository.findById(id).map(this::toDTO).orElseThrow(() -> new TodoNotFoundException(id));
     }
@@ -55,13 +57,31 @@ public class TodoService implements ITodoService {
     @Transactional
     public TodoResponseDTO updateById(Long id, TodoUpdateDTO todoUpdateDTO) {
         return repository.findById(id).map(entity -> {
-            entity.setName(todoUpdateDTO.getName());
-            entity.setDescription(todoUpdateDTO.getDescription());
-            entity.setPriority(todoUpdateDTO.getPriority());
-            entity.setStatus(todoUpdateDTO.getStatus());
-            entity.setDueDate(todoUpdateDTO.getDueDate());
+            if (todoUpdateDTO.getName() != null) {
+                if (!todoUpdateDTO.getName().equals(entity.getName()) && repository.existsByName(todoUpdateDTO.getName())) {
+                    throw new TodoAlreadyExisted(todoUpdateDTO.getName());
+                }
 
-            return toDTO(repository.save(entity));
+                entity.setName(todoUpdateDTO.getName());
+            }
+
+            if (todoUpdateDTO.getDescription() != null) {
+                entity.setDescription(todoUpdateDTO.getDescription());
+            }
+
+            if (todoUpdateDTO.getPriority() != null) {
+                entity.setPriority(todoUpdateDTO.getPriority());
+            }
+
+            if (todoUpdateDTO.getStatus() != null) {
+                entity.setStatus(todoUpdateDTO.getStatus());
+            }
+
+            if (todoUpdateDTO.getDueDate() != null) {
+                entity.setDueDate(todoUpdateDTO.getDueDate());
+            }
+
+            return toDTO(entity);
         }).orElseThrow(() -> new TodoNotFoundException(id));
     }
 

@@ -1,4 +1,4 @@
-package vn.nlu.todo.reponse;
+package vn.nlu.todo.response;
 
 import lombok.Builder;
 import lombok.Getter;

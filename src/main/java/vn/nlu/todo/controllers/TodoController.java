@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.nlu.todo.dto.TodoCreateDTO;
 import vn.nlu.todo.dto.TodoResponseDTO;
 import vn.nlu.todo.dto.TodoUpdateDTO;
-import vn.nlu.todo.reponse.ApiResponse;
+import vn.nlu.todo.response.ApiResponse;
 import vn.nlu.todo.services.TodoService;
 
 import java.util.List;
@@ -29,14 +29,14 @@ public class TodoController {
     public ResponseEntity<ApiResponse<TodoResponseDTO>> getById(@PathVariable Long id) {
         TodoResponseDTO todo = service.getById(id);
 
-        return ResponseEntity.status(201).body(ApiResponse.success("Tạo todo thành công", todo));
+        return ResponseEntity.ok(ApiResponse.success(todo));
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<TodoResponseDTO>> create(@Valid @RequestBody TodoCreateDTO todoCreateDTO) {
         TodoResponseDTO todo = service.create(todoCreateDTO);
 
-        return ResponseEntity.ok(ApiResponse.success(todo));
+        return ResponseEntity.status(201).body(ApiResponse.success("Tạo todo thành công", todo));
     }
 
     @PutMapping("/{id}")
@@ -49,6 +49,6 @@ public class TodoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         service.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Xóa todo thành công", null));
     }
 }

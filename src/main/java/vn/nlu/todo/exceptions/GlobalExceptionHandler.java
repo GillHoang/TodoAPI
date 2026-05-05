@@ -7,7 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import tools.jackson.databind.exc.InvalidFormatException;
-import vn.nlu.todo.reponse.ApiResponse;
+import vn.nlu.todo.response.ApiResponse;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +15,20 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(TodoNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleTodoNotFound(TodoNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(HttpStatus.NOT_FOUND, ex.getMessage()));
+    }
+
+    @ExceptionHandler(TodoAlreadyExisted.class)
+    public ResponseEntity<ApiResponse<Object>> handleTodoAlreadyExisted(TodoAlreadyExisted ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage()));
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Object>> handleValidation(MethodArgumentNotValidException ex) {
@@ -37,7 +51,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGeneral(Exception ex) {
+    public ResponseEntity<ApiResponse<Object>> handleGeneral() {
         return ResponseEntity.status(500).body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Đã xảy ra lỗi hệ thống"));
     }
 }
