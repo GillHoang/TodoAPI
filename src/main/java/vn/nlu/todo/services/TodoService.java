@@ -7,10 +7,9 @@ import vn.nlu.todo.dto.TodoCreateDTO;
 import vn.nlu.todo.dto.TodoResponseDTO;
 import vn.nlu.todo.dto.TodoUpdateDTO;
 import vn.nlu.todo.entities.TodoEntity;
-import vn.nlu.todo.enums.EPriority;
-import vn.nlu.todo.enums.EStatus;
 import vn.nlu.todo.exceptions.TodoAlreadyExisted;
 import vn.nlu.todo.exceptions.TodoNotFoundException;
+import vn.nlu.todo.mapstruct.TodoMapper;
 import vn.nlu.todo.repositories.TodoRepository;
 
 import java.util.List;
@@ -19,25 +18,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TodoService implements ITodoService {
     private final TodoRepository repository;
-
-    private TodoResponseDTO toDTO(TodoEntity entity) {
-        return TodoResponseDTO.builder().id(entity.getId()).name(entity.getName()).description(entity.getDescription()).status(entity.getStatus()).priority(entity.getPriority()).dueDate(entity.getDueDate()).createAt(entity.getCreateAt()).updateAt(entity.getUpdateAt()).build();
-    }
-
-    private TodoEntity toEntity(TodoCreateDTO dto) {
-        return TodoEntity.builder().name(dto.getName()).description(dto.getDescription()).priority(dto.getPriority() != null ? dto.getPriority() : EPriority.MEDIUM).dueDate(dto.getDueDate()).status(EStatus.TODO).build();
-    }
+    private final TodoMapper todoMapper;
 
     @Override
     @Transactional(readOnly = true)
     public List<TodoResponseDTO> getAll() {
-        return repository.findAll().stream().map(this::toDTO).toList();
+        return repository.findAll().stream().map(todoMapper::toResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public TodoResponseDTO getById(Long id) {
-        return repository.findById(id).map(this::toDTO).orElseThrow(() -> new TodoNotFoundException(id));
+        return repository.findById(id).map(todoMapper::toResponse).orElseThrow(() -> new TodoNotFoundException(id));
     }
 
     @Override
@@ -47,41 +39,23 @@ public class TodoService implements ITodoService {
             throw new TodoAlreadyExisted(todoCreateDTO.getName());
         }
 
-        TodoEntity entity = toEntity(todoCreateDTO);
+        TodoEntity entity = todoMapper.toEntity(todoCreateDTO);
         TodoEntity saved = repository.save(entity);
 
-        return toDTO(saved);
+        return todoMapper.toResponse(saved);
     }
 
     @Override
     @Transactional
     public TodoResponseDTO updateById(Long id, TodoUpdateDTO todoUpdateDTO) {
         return repository.findById(id).map(entity -> {
-            if (todoUpdateDTO.getName() != null) {
-                if (!todoUpdateDTO.getName().equals(entity.getName()) && repository.existsByName(todoUpdateDTO.getName())) {
-                    throw new TodoAlreadyExisted(todoUpdateDTO.getName());
-                }
-
-                entity.setName(todoUpdateDTO.getName());
+            if (todoUpdateDTO.getName() != null && !todoUpdateDTO.getName().equals(entity.getName()) && repository.existsByName(todoUpdateDTO.getName())) {
+                throw new TodoAlreadyExisted(todoUpdateDTO.getName());
             }
 
-            if (todoUpdateDTO.getDescription() != null) {
-                entity.setDescription(todoUpdateDTO.getDescription());
-            }
+            todoMapper.updateEntity(todoUpdateDTO, entity);
 
-            if (todoUpdateDTO.getPriority() != null) {
-                entity.setPriority(todoUpdateDTO.getPriority());
-            }
-
-            if (todoUpdateDTO.getStatus() != null) {
-                entity.setStatus(todoUpdateDTO.getStatus());
-            }
-
-            if (todoUpdateDTO.getDueDate() != null) {
-                entity.setDueDate(todoUpdateDTO.getDueDate());
-            }
-
-            return toDTO(entity);
+            return todoMapper.toResponse(entity);
         }).orElseThrow(() -> new TodoNotFoundException(id));
     }
 

@@ -1,6 +1,5 @@
 package vn.nlu.todo.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import vn.nlu.todo.enums.EPriority;
@@ -14,7 +13,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class TodoUpdateDTO {
-    @NotBlank(message = "Tiêu để không được để trống.")
     @Size(max = 100, message = "Tiêu đề có tối đa 100 kí tự.")
     private String name;
 
