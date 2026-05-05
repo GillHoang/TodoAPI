@@ -1,8 +1,6 @@
 package vn.nlu.todo.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -25,12 +23,9 @@ public class TodoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Tiêu để không được để trống.")
-    @Size(max = 100, message = "Tiêu đề có tối đa 100 kí tự.")
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100, unique = true)
     private String name;
 
-    @Size(max = 1000, message = "Mô tả có tối đa 1000 kí tự.")
     private String description;
 
     @Enumerated(EnumType.STRING)

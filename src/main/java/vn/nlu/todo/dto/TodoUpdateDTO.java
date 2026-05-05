@@ -19,7 +19,7 @@ public class TodoUpdateDTO {
     @Size(max = 1000, message = "Mô tả có tối đa 1000 kí tự.")
     private String description;
 
-    private EPriority priority = EPriority.MEDIUM;
+    private EPriority priority;
 
     private EStatus status;
 

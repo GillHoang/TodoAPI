@@ -23,6 +23,15 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder().status(HttpStatus.OK).message(message).data(data).timestamp(LocalDateTime.now()).build();
     }
 
+    public static <T> ApiResponse<T> success(HttpStatus status, String message, T data) {
+        return ApiResponse.<T>builder()
+                .status(status)
+                .message(message)
+                .data(data)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
     public static <T> ApiResponse<T> error(HttpStatus status, String message) {
         return ApiResponse.<T>builder().status(status).message(message).data(null).timestamp(LocalDateTime.now()).build();
     }

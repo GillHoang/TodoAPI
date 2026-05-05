@@ -35,7 +35,7 @@ public class TodoService implements ITodoService {
     @Override
     @Transactional
     public TodoResponseDTO create(TodoCreateDTO todoCreateDTO) {
-        if (repository.existsByName(todoCreateDTO.getName())) {
+        if (repository.existsByNameIgnoreCase(todoCreateDTO.getName())) {
             throw new TodoAlreadyExisted(todoCreateDTO.getName());
         }
 
@@ -49,7 +49,7 @@ public class TodoService implements ITodoService {
     @Transactional
     public TodoResponseDTO updateById(Long id, TodoUpdateDTO todoUpdateDTO) {
         return repository.findById(id).map(entity -> {
-            if (todoUpdateDTO.getName() != null && !todoUpdateDTO.getName().equals(entity.getName()) && repository.existsByName(todoUpdateDTO.getName())) {
+            if (todoUpdateDTO.getName() != null && !todoUpdateDTO.getName().equals(entity.getName()) && repository.existsByNameIgnoreCase(todoUpdateDTO.getName())) {
                 throw new TodoAlreadyExisted(todoUpdateDTO.getName());
             }
 

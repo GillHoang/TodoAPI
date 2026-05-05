@@ -6,5 +6,5 @@ import vn.nlu.todo.entities.TodoEntity;
 
 @Repository
 public interface TodoRepository extends JpaRepository<TodoEntity, Long> {
-    boolean existsByName(String name);
+    boolean existsByNameIgnoreCase(String name);
 }
